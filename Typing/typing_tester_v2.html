@@ -1,0 +1,248 @@
+<!DOCTYPE HTML> 
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="height=device-height, initial-scale=1.0">
+<script src="js/jquery-3.1.1.min.js" type="text/javascript"></script>
+
+<style>
+body{
+	font-family:Arial;
+}
+.blank{
+	float:left;
+	width:60px;
+	font-size:30px;
+	font-weight:bold;
+	font-family:'Dosis',sans-serif;
+	margin-right:20px;
+}
+#clock{
+	position:absolute;
+	font-size:25px;
+	margin:10px;
+	top:10px;
+	right:10px;
+}
+#next{
+	margin:auto;
+	margin-top:35px;
+	display:none;
+	cursor:pointer;
+}
+#word{
+	width:250px;
+	margin:auto;
+	padding-bottom:30px;
+	padding-top:30px;
+}
+#wrap{
+	position:relative;
+	width:600px;
+	height:300px;
+	background-color:#e8e8e8;
+	border-radius:10px;
+	margin:auto;
+	text-align:center;
+	margin-top:20px;
+}
+#start_button{
+	padding:10px; 
+	width:130px;
+	font-size:20px;
+	border-radius:3px; 
+	text-align:center; 
+	background-color:white; 
+	cursor:pointer; 
+	display:inline-block;
+	margin:auto;
+	margin-top:120px;
+	margin-bottom:15px;
+}
+#start_button:hover{
+	background-color:yellow;
+}
+#section1{
+	display:block;
+}
+#section2{
+	display:none;
+	margin-top:100px;
+}
+</style>
+
+<script type="text/javascript">
+
+	//timer
+	var started = "false";
+	var timer = 30;
+	var timeChange;
+	var key = "";
+	var letter = "";
+	var wordsArray = ["act","alter","amplify"];
+	var definitionArr = ["to perform","to change","to make stronger"];
+	var currentWordString = "";
+	var currentWordArr = [];
+	var letterCount = 0;
+	var wordCount = 0;
+	var currentLetter = "";
+	var wordComplete = "false";
+	var clue = "";
+	var wordWidth = 0;
+	
+	
+	function start(){
+		started = "true";
+		
+		$("#section1").css("display","none");
+		$("#section2").css("display","inline-block");
+		
+		showClue();
+		countDown();
+		
+	}
+	function clearVars(){
+		wordComplete = "false";
+		wordWidth = 0;
+		letterCount = 0;
+		timer = 30;
+		document.getElementById("clock").innerHTML= timer + " sec";
+		
+		for(i=0; i < currentWordArr.length; i++){
+			var num = i;
+			$('.blank').remove();
+			
+			var arrayLetter = currentWordArr[i];
+			
+			$('#' + arrayLetter).removeClass(String(num));
+		}
+		$("#next").css("display","none");
+	}
+	function nextWord(){
+		clearVars();
+		var wordsTotal = wordsArray.length;
+		if(wordCount < (wordsTotal - 1)){
+			wordCount = wordCount + 1;
+			currentWordString = wordsArray[wordCount];
+			currentWordArr = currentWordString.split("");
+			currentLetter = currentWordArr[0];
+			clue = definitionArr[wordCount];
+			document.getElementById("clueText").innerHTML= clue;
+			document.getElementById("letterToMatch").innerHTML= currentLetter;
+		
+			for(i=0; i < currentWordArr.length; i++){
+		
+				var num = i;
+				wordWidth = wordWidth + 80;
+		
+				$('#word').append("<div id='fill_" +  num  + "' class='blank'>____</div>");
+			}
+			$('#word').css('width', wordWidth);
+		
+			started = "true";
+			showClue();
+			countDown();
+		}
+		else{
+			document.getElementById("clueText").innerHTML= "That's all, folks!";
+		}
+	}
+	
+	function countDown(){
+		console.log('timer clicked');
+		timeChange = setInterval(function(){
+			if (timer <= 1){
+				clearInterval(timeChange);
+				if(wordComplete != "true"){
+					console.log("Time's up! You didn't guess the word.");
+					document.getElementById("clueText").innerHTML= "Time's up! You didn't guess the word.";
+				}
+			}
+			timer = timer - 1;
+			document.getElementById("clock").innerHTML= timer + " sec";	
+		}, 1000);
+	}
+	function showClue(){
+		document.getElementById("clueText").innerHTML= clue;
+	}
+	
+	$(document).keypress(function(e){
+		key = e.which;
+		letter = String.fromCharCode(key);
+		
+		if(started == 'true'){
+		
+		document.getElementById("letterTyped").innerHTML= letter;
+		//console.log('letter pressed: ' + letter);
+		if(letter == currentLetter){
+			document.getElementById('fill_' + letterCount).innerHTML=currentLetter;
+			letterCount = letterCount + 1;
+			document.getElementById("match").innerHTML= "YES!";
+			
+			if(letterCount < currentWordArr.length){
+				currentLetter = currentWordArr[letterCount];
+				document.getElementById("letterToMatch").innerHTML= currentLetter;
+			}
+			else{
+				document.getElementById("clueText").innerHTML= "Correct!";
+				console.log('word typed!');
+				wordComplete = "true";
+				clearInterval(timeChange);
+				$("#next").css("display","block");
+			}
+			
+		}
+		else{
+			document.getElementById("match").innerHTML= "NO.";
+		}
+		
+		}
+	});
+	
+	$(document).ready(function(){
+		
+		currentWordString = wordsArray[0];
+		currentWordArr = currentWordString.split("");
+		currentLetter = currentWordArr[0];
+		clue = definitionArr[wordCount];
+		
+		document.getElementById("letterToMatch").innerHTML= currentLetter;
+		
+		for(i=0; i< currentWordArr.length; i++){
+		
+			var num = i;
+			wordWidth = wordWidth + 80;
+		
+			$('#word').append("<div id='fill_" +  num  + "' class='blank'>____</div>");
+		}
+		$('#word').css('width', wordWidth);
+	});
+	
+</script>
+</head>
+
+<body>
+
+<div id="wrap">
+	
+	<div id="section1">
+		<div id="start_button" onclick="start();">START</div>
+	</div>
+	<div id="section2">
+		<div id="clock">30 sec</div>
+		<div id="clueText">Click Button for Clue</div>
+		<div id="word"></div>
+		<button id="next" onclick="nextWord();">Next Word</div>
+	</div>
+	
+	<div id="hidden" style="display:none;">
+		<div id="letterToMatch">-</div>
+		<div id="letterTyped">None</div>
+		<div id="match">NO</div>
+	</div>
+</div>
+
+</body>
+
+</html>
